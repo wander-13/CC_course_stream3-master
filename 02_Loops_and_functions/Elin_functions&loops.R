@@ -219,3 +219,20 @@ meadow.pipit <- filter(LPI.UK, Common.Name == "Meadow pipit")
 panel <- grid.arrange(house.sparrow_scatter, great.tit_scatter, corn.bunting_scatter, meadow.pipit_scatter, ncol = 2)
 ggsave(panel, file = "Pop_trend_panel.png", width = 10, height = 8)
 dev.off() # to close the image
+
+# list species data frames
+Sp_list <- list(house.sparrow, great.tit, corn.bunting, meadow.pipit)
+# write loop for creating plots
+for (i in 1:length(Sp_list)) {                                    # For every item along the length of Sp_list we want R to perform the following functions
+  data <- as.data.frame(Sp_list[i])                               # Create a dataframe for each species
+  sp.name <- unique(data$Common.Name)                             # Create an object that holds the species name, so that we can title each graph
+  plot <- ggplot(data, aes (x = year, y = abundance)) +               # Make the plots and add our customised theme
+    geom_point(size = 2, colour = "#00868B") +                                                
+    geom_smooth(method = lm, colour = "#00868B", fill = "#00868B") +          
+    theme.my.own() +
+    labs(y = "Abundance\n", x = "", title = sp.name)
+  
+  ggsave(plot, file = paste(sp.name, ".pdf", sep = ''), scale = 2)       # save plots as .pdf, you can change it to .png if you prefer that
+  
+  print(plot)                                                      # print plots to screen
+}
