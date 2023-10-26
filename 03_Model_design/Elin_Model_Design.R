@@ -1,7 +1,7 @@
 # Model Design
 # By: Elin Swank
 # Date: 10/26/2023
-Coding Club tutorial
+# Coding Club tutorial
 ################################################################################
 
 # Load libraries ----
@@ -12,6 +12,7 @@ library(ggeffects)  # to visualise model predictions
 library(MCMCglmm)  # for Bayesian models
 library(MCMCvis)  # to visualise Bayesian model outputs
 library(stargazer)  # for tables of model outputs
+library(glmmTMB)
 
 # Load data ----
 # Remember to set your working directory to the folder
@@ -69,3 +70,65 @@ toolik_plants <- toolik_plants %>%
 #         Species != "Hole"&
 #				 Species != "Vole trail"....))
 # But you can see how that involves unnecessary repetition.
+
+length(unique(toolik_plants$Species))
+
+# Calculate species richness
+toolik_plants <- toolik_plants %>%
+  group_by(Year, Site, Block, Plot) %>%
+  mutate(Richness = length(unique(Species))) %>%
+  ungroup()
+
+(hist <- ggplot(toolik_plants, aes(x = Richness)) +
+    geom_histogram() +
+    theme_classic())
+
+(hist2 <- ggplot(toolik_plants, aes(x = Relative.Cover)) +
+    geom_histogram() +
+    theme_classic())
+# histogram shows relative cover is left skewed
+
+# Research Question: How has species richness changed over time at Toolik Lake?
+# Richness is a function of time, richness ~ time
+# Richness = Explained Variable
+# Time = Explanatory Variable
+
+# model with no random effects
+plant_m <- lm(Richness ~ I(Year-2007),     # makes year 2008 = year 1, and so on...
+              data = toolik_plants)
+summary(plant_m)
+# try without changing year
+# plant_m <- lm(Richness ~ Year, data = toolik_plants)
+# summary(plant_m)
+
+plot(plant_m)
+
+# Hierarchical models using lme4
+# account for site effects
+plant_m_plot <- lmer(Richness ~ I(Year-2007) + (1|Site), data = toolik_plants)
+summary(plant_m_plot)
+
+# accounting for site and block effects
+plant_m_plot2 <- lmer(Richness ~ I(Year-2007) + (1|Site/Block), data = toolik_plants)
+summary(plant_m_plot2)
+
+# account for site, block and plot effects
+plant_m_plot3 <- lmer(Richness ~ I(Year-2007) + (1|Site/Block/Plot), data = toolik_plants)
+summary(plant_m_plot3)
+
+plot(plant_m_plot3)  # Checking residuals
+
+# visualize plots
+# Set a clean theme for the graphs
+set_theme(base = theme_bw() +
+            theme(panel.grid.major.x = element_blank(),
+                  panel.grid.minor.x = element_blank(),
+                  panel.grid.minor.y = element_blank(),
+                  panel.grid.major.y = element_blank(),
+                  plot.margin = unit(c(0.5, 0.5, 0.5, 0.5), units = , "cm")))
+
+# Visualises random effects
+(re.effects <- plot_model(plant_m_plot3, type = "re", show.values = TRUE))
+
+save_plot(filename = "model_re.png",
+          height = 8, width = 15)  # Save the graph if you wish
