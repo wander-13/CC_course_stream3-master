@@ -155,3 +155,18 @@ save_plot(filename = "model_temp_fe.png",
 (temp.re.effects <- plot_model(plant_m_temp, type = "re", show.values = TRUE))
 save_plot(filename = "model_temp_re.png",
           height = 8, width = 15)
+
+# allow each plot to have it's own relationship with temperature
+
+plant_m_rs <- lmer(Richness ~ Mean.Temp + (Mean.Temp|Site/Block/Plot) + (1|Year),
+                   data = toolik_plants)    # model does not merge
+summary(plant_m_rs)
+
+# simplify and continue (ignores hierarchical grouping of blocks and plots, violates regression assumptions)
+plant_m_rs <- lmer(Richness ~ Mean.Temp + (Mean.Temp|Site) + (1|Year),
+                   data = toolik_plants)
+summary(plant_m_rs)
+
+(plant.fe.effects <- plot_model(plant_m_rs, show.values = TRUE))
+save_plot(filename = "model_plant_fe.png",
+          height = 8, width = 15)
