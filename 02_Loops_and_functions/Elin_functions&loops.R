@@ -14,3 +14,5 @@ example.fn <- function(x, y){
   # Perform an action using x and y
   x + y
 }
+
+example.fn(x = 1, y = 2)
