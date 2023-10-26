@@ -139,3 +139,19 @@ save_plot(filename = "model_re.png",
 
 save_plot(filename = "model_fe.png",
           height = 8, width = 15)  # Save the graph if you wish
+
+# check the effect of mean.temp on richness, with year as a random effect and 
+# the same hierarchichal structure for site/block/plot as random effects
+plant_m_temp <- lmer(Richness ~ Mean.Temp + (1|Site/Block/Plot) + (1|Year),
+                     data = toolik_plants)
+summary(plant_m_temp)
+
+# Visualise the fixed effect
+(temp.fe.effects <- plot_model(plant_m_temp, show.values = TRUE))
+save_plot(filename = "model_temp_fe.png",
+          height = 8, width = 15)
+
+# Visualise the random effect terms
+(temp.re.effects <- plot_model(plant_m_temp, type = "re", show.values = TRUE))
+save_plot(filename = "model_temp_re.png",
+          height = 8, width = 15)
