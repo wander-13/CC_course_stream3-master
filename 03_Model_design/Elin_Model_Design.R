@@ -170,3 +170,49 @@ summary(plant_m_rs)
 (plant.fe.effects <- plot_model(plant_m_rs, show.values = TRUE))
 save_plot(filename = "model_plant_fe.png",
           height = 8, width = 15)
+
+(plant.re.effects <- plot_model(plant_m_rs, type = "re", show.values = TRUE))
+save_plot(filename = "model_plant_re.png",
+          height = 8, width = 15)
+
+ggpredict(plant_m_rs, terms = c("Mean.Temp")) %>% plot()
+save_plot(filename = "model_temp_richness.png",
+          height = 12, width = 14)
+
+ggpredict(plant_m_rs, terms = c("Mean.Temp", "Site"), type = "re") %>% plot() +
+  theme(legend.position = "bottom")
+save_plot(filename = "model_temp_richness_rs_ri.png",
+          height = 12, width = 14)
+
+# Overall predictions - note that we have specified just mean temperature as a term
+predictions <- ggpredict(plant_m_rs, terms = c("Mean.Temp"))
+
+(pred_plot1 <- ggplot(predictions, aes(x, predicted)) +
+    geom_line() +
+    geom_ribbon(aes(ymin = conf.low, ymax = conf.high), alpha = .1) +
+    scale_y_continuous(limits = c(0, 35)) +
+    labs(x = "\nMean annual temperature", y = "Predicted species richness\n"))
+
+ggsave(pred_plot1, filename = "overall_predictions.png",
+       height = 5, width = 5)
+
+# Predictions for each grouping level (here plot which is a random effect)
+# re stands for random effect
+predictions_rs_ri <- ggpredict(plant_m_rs, terms = c("Mean.Temp", "Site"), type = "re")
+
+(pred_plot2 <- ggplot(predictions_rs_ri, aes(x = x, y = predicted, colour = group)) +
+    stat_smooth(method = "lm", se = FALSE)  +
+    scale_y_continuous(limits = c(0, 35)) +
+    theme(legend.position = "bottom") +
+    labs(x = "\nMean annual temperature", y = "Predicted species richness\n"))
+
+ggsave(pred_plot2, filename = "ri_rs_predictions.png",
+       height = 5, width = 5)
+
+(pred_plot3 <- ggplot(predictions_rs_ri, aes(x = x, y = predicted, colour = group)) +
+    stat_smooth(method = "lm", se = FALSE)  +
+    theme(legend.position = "bottom") +
+    labs(x = "\nMean annual temperature", y = "Predicted species richness\n"))
+
+ggsave(pred_plot3, filename = "ri_rs_predictions_zoom.png",
+       height = 5, width = 5)
