@@ -36,3 +36,62 @@ basal.area <- function(...){
 basal.area(trees_bicuar$diam, trees_mlunguya$diam)
 
 trees_bicuar$ba <- basal.area(dbh = trees_bicuar$diam)
+
+
+for(i in list){
+  # PERFORM SOME ACTION
+}
+
+trees_bicuar$ba <- basal.area(trees_bicuar$diam)
+trees_mlunguya$ba <- basal.area(trees_mlunguya$diam)
+# above with for loop and list
+trees <- list("trees_bicuar" = trees_bicuar, "trees_mlunguya" = trees_mlunguya)
+for( i in 1:length(trees) ){
+  trees[[i]]$ba <- basal.area(trees[[i]]$diam)
+}
+
+
+trees_mlunguya_list <- split(trees_mlunguya, trees_mlunguya$year)
+# Create an empty list
+mean_ba_list <- list()
+
+for( i in 1:length(trees_mlunguya_list) ){
+  ba <- basal.area(trees_mlunguya_list[[i]]$diam)
+  mean_ba <- mean(ba)
+  year <- mean(trees_mlunguya_list[[i]]$year)
+  dat <- data.frame(year, mean_ba)
+  mean_ba_list[[i]] <- dat
+}
+
+ba.mean.year <- function(dbh, year){
+  data.frame(
+    mean_ba = mean(basal.area(dbh)),
+    year = mean(year)
+  )    
+}
+
+ba.mean.year(trees_mlunguya_list[[1]]$diam, trees_mlunguya_list[[1]]$year)
+
+for( i in 1:length(trees_mlunguya_list) ){
+  mean_ba_list[[i]] <- ba.mean.year(
+    trees_mlunguya_list[[i]]$diam,
+    trees_mlunguya_list[[i]]$year)
+}
+# above using lapply()
+lapply(trees_mlunguya_list, function(x){ba.mean.year(dbh = x$diam, year = x$year)})
+
+
+bicuar_height_list <- split(trees_bicuar$height, trees_bicuar$family)
+
+lapply(bicuar_height_list, mean, na.rm = TRUE)
+
+sapply(bicuar_height_list, mean, na.rm = TRUE)
+
+# using if else statement
+stick.adj.lorey <- function(height, method, ba){
+  height_adj <- ifelse(method == "stick", height + 1, round(height, digits = 1))
+  
+  lorey_height <- sum(height_adj * ba, na.rm = TRUE) / sum(ba, na.rm = TRUE)
+  
+  return(lorey_height)
+}
