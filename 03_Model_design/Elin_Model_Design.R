@@ -216,3 +216,36 @@ ggsave(pred_plot2, filename = "ri_rs_predictions.png",
 
 ggsave(pred_plot3, filename = "ri_rs_predictions_zoom.png",
        height = 5, width = 5)
+
+# LET'S GRADUALLY BUILD A MORE COMPLEX MODEL
+plant_mcmc <- MCMCglmm(Richness ~ I(Year - 2007), random = ~Site,
+                       family = "poisson",  data = toolik_plants) # does not converge
+
+# use block and plot as random intercepts
+plant_mcmc <- MCMCglmm(Richness ~ I(Year-2007), random = ~Block + Plot,
+                       family = "poisson", data = toolik_plants)
+
+summary(plant_mcmc)
+
+plot(plant_mcmc$VCV) # random effects
+plot(plant_mcmc$Sol) # fixed effects
+
+# Set weakly informative priors
+prior2 <- list(R = list(V = 1, nu = 0.002),
+               G = list(G1 = list(V = 1, nu = 1, alpha.mu = 0, alpha.v = 10000),
+                        G2 = list(V = 1, nu = 1, alpha.mu = 0, alpha.v = 10000),
+                        G3 = list(V = 1, nu = 1, alpha.mu = 0, alpha.v = 10000)))
+
+# Extract just the Betula nana data
+betula <- filter(toolik_plants, Species == "Bet nan")
+
+betula_m <- MCMCglmm(round(Relative.Cover*100) ~ Year, random = ~Site + Block + Plot,
+                     family = "poisson", prior = prior2, data = betula)
+
+summary(betula_m)
+plot(betula_m$VCV)
+plot(betula_m$Sol)
+
+# visualize model outputs
+MCMCplot(betula_m$Sol)
+MCMCplot(betula_m$VCV)
