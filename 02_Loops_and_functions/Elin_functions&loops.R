@@ -95,3 +95,24 @@ stick.adj.lorey <- function(height, method, ba){
   
   return(lorey_height)
 }
+# test on lapply()
+trees_bicuar_list <- split(trees_bicuar, trees_bicuar$plotcode)
+
+lapply(trees_bicuar_list, function(x){stick.adj.lorey(height = x$height, method = x$height_method, ba = x$ba)})
+
+
+diam.summ <- function(dbh, mean = TRUE, median = TRUE, ba = TRUE){
+  mean_dbh <- ifelse(mean == TRUE, 
+                     mean(dbh), 
+                     NA)
+  median_dbh <- ifelse(median == TRUE, 
+                       median(dbh), 
+                       NA)
+  mean_ba <- ifelse(ba == TRUE, 
+                    mean(basal.area(dbh)), 
+                    NA)
+  
+  return(as.data.frame(na.omit(t(data.frame(mean_dbh, median_dbh, mean_ba)))))
+}
+
+diam.summ(dbh = trees_bicuar$diam, mean = TRUE, median = T)
