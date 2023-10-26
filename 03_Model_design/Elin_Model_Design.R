@@ -132,3 +132,10 @@ set_theme(base = theme_bw() +
 
 save_plot(filename = "model_re.png",
           height = 8, width = 15)  # Save the graph if you wish
+
+
+# To see the estimate for our fixed effect (default): Year
+(fe.effects <- plot_model(plant_m_plot3, show.values = TRUE))
+
+save_plot(filename = "model_fe.png",
+          height = 8, width = 15)  # Save the graph if you wish
