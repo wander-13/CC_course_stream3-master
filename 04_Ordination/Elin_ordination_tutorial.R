@@ -14,7 +14,7 @@ install.packages("dplyr")
 
 library(vegan)
 library(ape)
-library(dplyr)
+library(plyr);library(dplyr)
 
 # Load the community dataset which we`ll use in the examples today
 data(varespec)
@@ -48,3 +48,22 @@ sum((as.vector(PCA$CA$eig)/sum(PCA$CA$eig))[1:3]) # 79%, this is ok.
 plot(PCA)
 plot(PCA, display = "sites", type = "points")
 plot(PCA, display = "species", type = "text")
+plot(PCA, type = "points")
+
+# You can extract the species and site scores on the new PC for further analyses:
+sitePCA <- PCA$CA$u # Site scores
+speciesPCA <- PCA$CA$v # Species scores
+
+# In a biplot of a PCA, species' scores are drawn as arrows 
+# that point in the direction of increasing values for that variable
+biplot(PCA, choices = c(1,2), type = c("text", "points"), xlim = c(-5,10)) # biplot of axis 1 vs 2
+biplot(PCA, choices = c(1,3), type = c("text","points")) # biplot of axis 1 vs 3
+
+# Check out the help file how to pimp your biplot further:
+?biplot.rda
+
+# You can even go beyond that, and use the ggbiplot package.
+# You can install this package by running:
+library(devtools)
+install_github("vqv/ggbiplot")
+library(ggbiplot)
