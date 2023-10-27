@@ -14,6 +14,11 @@ install.packages("dplyr")
 
 library(vegan)
 library(ape)
+# You can even go beyond that, and use the ggbiplot package.
+# You can install this package by running:
+library(devtools)
+install_github("vqv/ggbiplot")
+library(ggbiplot)
 library(plyr);library(dplyr)
 
 # Load the community dataset which we`ll use in the examples today
@@ -41,7 +46,7 @@ barplot(as.vector(PCA$CA$eig)/sum(PCA$CA$eig))
 # Calculate the percent of variance explained by first two axes
 sum((as.vector(PCA$CA$eig)/sum(PCA$CA$eig))[1:2]) # 79%, this is ok.
 # Also try to do it for the first three axes
-sum((as.vector(PCA$CA$eig)/sum(PCA$CA$eig))[1:3]) # 79%, this is ok.
+sum((as.vector(PCA$CA$eig)/sum(PCA$CA$eig))[1:3]) 
 
 
 # Now, we`ll plot our results with the plot function
@@ -62,8 +67,30 @@ biplot(PCA, choices = c(1,3), type = c("text","points")) # biplot of axis 1 vs 3
 # Check out the help file how to pimp your biplot further:
 ?biplot.rda
 
-# You can even go beyond that, and use the ggbiplot package.
-# You can install this package by running:
-library(devtools)
-install_github("vqv/ggbiplot")
-library(ggbiplot)
+# First step is to calculate a distance matrix. 
+# Here we use Bray-Curtis distance metric
+dist <- vegdist(varespec,  method = "bray")
+
+# PCoA is not included in vegan. 
+# We will use the ape package instead
+library(ape)
+PCOA <- pcoa(dist)
+
+# plot the eigenvalues and interpret
+barplot(PCOA$values$Relative_eig[1:10])
+# Can you also calculate the cumulative explained variance of the first 3 axes?
+sum(as.vector(PCOA$values$Cum_corr_eig[3])) # 57% cumulative explained variance
+
+# Some distance measures may result in negative eigenvalues. In that case, add a correction:
+PCOA <- pcoa(dist, correction = "cailliez")
+
+# Plot your results
+biplot.pcoa(PCOA)
+
+# You see what`s missing? 
+# Indeed, there are no species plotted on this biplot. 
+# That's because we used a dissimilarity matrix (sites x sites) 
+# as input for the PCOA function. 
+# Hence, no species scores could be calculated. 
+#However, we could work around this problem like this:
+biplot.pcoa(PCOA, varespec)
