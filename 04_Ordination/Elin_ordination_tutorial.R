@@ -41,6 +41,8 @@ barplot(as.vector(PCA$CA$eig)/sum(PCA$CA$eig))
 # Calculate the percent of variance explained by first two axes
 sum((as.vector(PCA$CA$eig)/sum(PCA$CA$eig))[1:2]) # 79%, this is ok.
 # Also try to do it for the first three axes
+sum((as.vector(PCA$CA$eig)/sum(PCA$CA$eig))[1:3]) # 79%, this is ok.
+
 
 # Now, we`ll plot our results with the plot function
 plot(PCA)
