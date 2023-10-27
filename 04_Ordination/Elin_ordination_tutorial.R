@@ -218,8 +218,8 @@ plot(efdune, p.max = 0.05)
 
 # Challenge 2
 # perform classification and overlay on ordination
-group = c(rep("Group1", 12), rep("Group2", 8))
-colors = c(rep("red", 12), rep("blue", 8))
+group = c(rep("Group1", 10), rep("Group2", 10))
+colors = c(rep("red", 10), rep(10))
 
 ordiplot(duneNMDS3, type = "n")
 for(i in unique(group)) {
@@ -227,5 +227,5 @@ for(i in unique(group)) {
            groups = group[group == i],col = colors[grep(i,group)],label=F) } 
 
 orditorp(duneNMDS3, display = "species", col = "red", air = 0.01)
-orditorp(duneNMDS3, display = "sites", col = c(rep("red",12),
-                                           rep("blue", 12)), air = 0.01, cex = 1.25)
+orditorp(duneNMDS3, display = "sites", col = c(rep("red",10),
+                                           rep("blue", 10)), air = 0.01, cex = 1.25)
