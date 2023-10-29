@@ -13,7 +13,7 @@
 
 ## load the data and have a look at it
 
-load("dragons.RData")
+load("05_Mixed_modelsdragons.RData")
 
 head(dragons)
 
@@ -109,8 +109,13 @@ summary(mountain.lm)
 ##----- First mixed model -----##
 
 ### model
+mixed.lmer <- lmer(testScore ~ bodyLength2 + (1|mountainRange), data = dragons)
+summary(mixed.lmer)
 
 ### plots
+plot(mixed.lmer)  # looks alright, no patterns evident
+qqnorm(resid(mixed.lmer))
+qqline(resid(mixed.lmer))  # points fall nicely onto the line - good!
 
 ### summary
 
@@ -124,16 +129,36 @@ head(dragons)  # we have site and mountainRange
 str(dragons)  # we took samples from three sites per mountain range and eight mountain ranges in total
 
 ### create new "sample" variable
-
+dragons <- within(dragons, sample <- factor(mountainRange:site))
 
 ##----- Second mixed model -----##
+mixed.WRONG <- lmer(testScore ~ bodyLength2 + (1|mountainRange) + (1|site), data = dragons)  
+# treats the two random effects as if they are crossed, when they are actually nested
+summary(mixed.WRONG)
+
 
 ### model
-
+mixed.lmer2 <- lmer(testScore ~ bodyLength2 + (1|mountainRange) + (1|sample), data = dragons)  # the syntax stays the same, but now the nesting is taken into account
+summary(mixed.lmer2)
 ### summary
+# Using the varible "sample" that we created, we are trying to account for the
+# mountain range level and site level variance
+# We are able to specify nesting in other ways:
+# using these terms in the model arguments: 
+# (1|mountainRange/site) or (1|mountainRange) + (1|mountainRange:site)
+# but you would need to remember to do this for every model call to the data
+# by stating the relationship explicitly in the dataframe itself you no longer 
+# need to state it explicitly in the model calls as it is now defined in the data
 
 ### plot
-
+(mm_plot <- ggplot(dragons, aes(x = bodyLength, y = testScore, colour = site)) +
+    facet_wrap(~mountainRange, nrow=2) +   # a panel for each mountain range
+    geom_point(alpha = 0.5) +
+    theme_classic() +
+    geom_line(data = cbind(dragons, pred = predict(mixed.lmer2)), aes(y = pred), linewidth = 1) +  # adding predicted line from mixed model 
+    theme(legend.position = "none",
+          panel.spacing = unit(2, "lines"))  # adding space between panels
+)
 
 
 ##----- Model selection for the keen -----##
