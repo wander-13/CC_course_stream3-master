@@ -176,6 +176,51 @@ summary(mixed.ranslope)
 )
 
 ##----- Presenting your model... nicely!
+# ggplot2 is not designed to handle mixed-effects model objects, so we must use
+# ggeffects package
+library(ggeffects)  # install the package first if you haven't already, then load it
+
+# Extract the prediction data frame
+pred.mm <- ggpredict(mixed.lmer2, terms = c("bodyLength2"))  # this gives overall predictions for the model
+
+# Plot the predictions 
+
+(ggplot(pred.mm) + 
+    geom_line(aes(x = x, y = predicted)) +          # slope
+    geom_ribbon(aes(x = x, ymin = predicted - std.error, ymax = predicted + std.error), 
+                fill = "lightgrey", alpha = 0.5) +  # error band
+    geom_point(data = dragons,                      # adding the raw data (scaled values)
+               aes(x = bodyLength2, y = testScore, colour = mountainRange)) + 
+    labs(x = "Body Length (indexed)", y = "Test Score", 
+         title = "Body length does not affect intelligence in dragons") + 
+    theme_minimal()
+)
+# to visualize the relationships at different levels of the random effects, specify
+# type = "re" (indicating random effects), inside the ggpredict function, also 
+# add the random effect name to the terms argument
+
+# a quicker way to plot this would be:
+# Library
+library(dplyr)
+
+ggpredict(mixed.lmer2, terms = c("bodyLength2", "mountainRange"), type = "re") %>% 
+  plot() +
+  labs(x = "Body Length", y = "Test Score", title = "Effect of body size on intelligence in dragons") +
+  theme_classic()
+
+# visualize mixed models, showing variation among levels of your random effects:
+##-- If you have a random slope model!
+# plot the departure from the overall model estimate for intercepts and slopes
+
+library(sjPlot)
+
+# Visualise random effects 
+(re.effects <- plot_model(mixed.ranslope, type = "re", show.values = TRUE))
+# shows the difference between the general intercept or slope value found in the model summary
+# and the estimate for this specific level of random effect
+
+# show summary
+summary(mixed.ranslope)
 
 
 ##----- Model selection for the keen -----##
