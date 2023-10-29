@@ -160,6 +160,23 @@ summary(mixed.lmer2)
           panel.spacing = unit(2, "lines"))  # adding space between panels
 )
 
+##----- Model allowing random slopes as well as random intercepts -----##
+mixed.ranslope <- lmer(testScore ~ bodyLength2 + (1 + bodyLength2|mountainRange/site), data = dragons) 
+
+summary(mixed.ranslope)
+
+### plot
+(mm_plot <- ggplot(dragons, aes(x = bodyLength, y = testScore, colour = site)) +
+    facet_wrap(~mountainRange, nrow=2) +   # a panel for each mountain range
+    geom_point(alpha = 0.5) +
+    theme_classic() +
+    geom_line(data = cbind(dragons, pred = predict(mixed.ranslope)), aes(y = pred), size = 1) +  # adding predicted line from mixed model 
+    theme(legend.position = "none",
+          panel.spacing = unit(2, "lines"))  # adding space between panels
+)
+
+##----- Presenting your model... nicely!
+
 
 ##----- Model selection for the keen -----##
 
