@@ -222,11 +222,24 @@ library(sjPlot)
 # show summary
 summary(mixed.ranslope)
 
+###----- Tables
+library(stargazer)
+
+stargazer(mixed.lmer2, type = "text", # allows you to see ouput in console
+          digits = 3,
+          star.cutoffs = c(0.05, 0.01, 0.001),
+          digit.separator = "")
 
 ##----- Model selection for the keen -----##
 
 ### full model
+full.lmer <- lmer(testScore ~ bodyLength2 + (1|mountainRange) + (1|sample), 
+                  data = dragons, REML = FALSE) # REML = Restricted/residual maximum likelihood
 
 ### reduced model
+reduced.lmer <- lmer(testScore ~ 1 + (1|mountainRange) + (1|sample), 
+                     data = dragons, REML = FALSE)
 
 ### comparison
+anova(reduced.lmer, full.lmer)  # the two models are not significantly different
+
