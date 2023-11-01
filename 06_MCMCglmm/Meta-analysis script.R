@@ -4,7 +4,7 @@
 library("MCMCglmm") # for meta-analysis
 library("dplyr") # for data manipulation
 
-migrationdata <- read.csv(~"migration_metadata.csv", header = T) # import dataset
+migrationdata <- read.csv("06_MCMCglmm/migration_metadata.csv", header = T) # import dataset
 View(migrationdata) # have a look at the dataset. Check out the Predictor variable. There are two, time and temperature.
 
 ### Create dataset
@@ -15,6 +15,10 @@ filter(Predictor == "year") -> migrationtime # this reduces the dataset to one p
 ### Plot data
 
 plot(migrationtime$Slope, I(1/migrationtime$SE)) # this makes the funnel plot.
+
+# zoom plot
+
+plot(migrationtime$Slope, I(1/migrationtime$SE), xlim = c(-2,2), ylim = c(0, 60))
 
 ### First model
 
@@ -32,6 +36,9 @@ par(mfrow = c(1,3))
 hist(mcmc(randomtest$VCV)[,"Study"])
 hist(mcmc(randomtest$VCV)[,"Location"])
 hist(mcmc(randomtest$VCV)[,"Species"])
+
+# reset plot panel back to single plots
+par(mfrow = c(1,1))
 
 ### Assessing convergence
 
@@ -62,7 +69,7 @@ prior2<-list(R=list(V=diag(1),nu=0.002)
                       , G1=list(V=diag(1),fix=1)))
 
 randomerror2 <- MCMCglmm (Slope~1, random = ~Species+Location+Study+idh(SE):units, data = migrationtime, prior=prior2, nitt = 60000)
-summary(randomerror)
+summary(randomerror2)
 plot(randomerror2$VCV)
 
 # Model checks
@@ -94,9 +101,43 @@ points(xsim, I(1/migrationtime$SE), col = "red") # here you can plot the data fr
 xsim<-simulate(randomerror3, 1000) # 1000 represents the number of simulations, and for some reason needs to be higher than the default to work in this case
 hist(apply(xsim, 2, max), breaks = 30) # plot your simulation data
 
-abline(v = max(migration$Slope), col = "red") # check to see whether the max value of your real data falls within this histogram.
+abline(v = max(migrationtime$Slope), col = "red") # check to see whether the max value of your real data falls within this histogram.
 
+################################################################################
+# Repeat above with Predictor "time"
+# Filter datset
+migrationdata %>% filter(Predictor == "temperature") -> migrationtemp
 
+# funnel plot
+plot(migrationtemp$Slope, I(1/migrationtemp$SE))
+
+# basic random effects model, save the posterior mode
+randomtesttemp <- MCMCglmm (Slope~1, random = ~Species+Location+Study, data = migrationtemp)
+
+# plot VCV (random) and Sol(fixed), check autocorrelation
+plot(randomtesttemp$Sol)
+plot(randomtesttemp$VCV)
+
+# increase iterations and burnin
+randompriortemp <- MCMCglmm (Slope~1, random = ~Species+Location+Study, data = migrationtemp, prior=prior, nitt = 60000, burnin = 5000)
+summary(randompriortemp)
+plot(randompriortemp$Sol)
+plot(randompriortemp$VCV)
+
+randomerrortemp <- MCMCglmm (Slope~1, random = ~Species+Location+Study+idh(SE):units, data = migrationtemp, prior=prior2, nitt = 60000, burnin = 5000)
+summary(randomerrortemp)
+plot(randomerrortemp$Sol)
+plot(randomerrortemp$VCV)
+
+randomerrortemp2 <- MCMCglmm (Slope~1, random = ~Species+Location+Study+idh(SE):units, data = migrationtemp, prior=prior3, nitt = 60000, burnin = 5000)
+
+# Model Checks
+xsim<-simulate(randomerrortemp2)
+
+plot(migrationtemp$Slope, I(1/migrationtemp$SE))
+points(xsim, I(1/migrationtemp$SE), col = "red") # here you can plot the data from both your simulated and real datasets and compare them
+
+################################################################################
 #### Fixed effects
 
 fixedtest <- MCMCglmm (Slope~Migration_distance+Continent, random = ~Species+Location+Study+idh(SE):units, prior = prior3, data = migrationtime, nitt = 60000)
@@ -135,7 +176,7 @@ fixedtest <- MCMCglmm (Slope~Migration_distance+Continent, random = ~Species+Loc
 
 ####### Now it's your turn #######
 
-#### Now it’s your turn!
+#### Now it?s your turn!
 
 # 1. Filter the data by rows which have temperature as the predictor
 # 2. Plot the data using a funnel plot
