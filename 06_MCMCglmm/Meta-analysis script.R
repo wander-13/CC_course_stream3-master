@@ -4,6 +4,9 @@
 library("MCMCglmm") # for meta-analysis
 library("dplyr") # for data manipulation
 
+
+
+
 migrationdata <- read.csv("06_MCMCglmm/migration_metadata.csv", header = T) # import dataset
 View(migrationdata) # have a look at the dataset. Check out the Predictor variable. There are two, time and temperature.
 
@@ -140,6 +143,7 @@ points(xsim, I(1/migrationtemp$SE), col = "red") # here you can plot the data fr
 ################################################################################
 #### Fixed effects
 
+
 fixedtest <- MCMCglmm (Slope~Migration_distance+Continent, random = ~Species+Location+Study+idh(SE):units, prior = prior3, data = migrationtime, nitt = 60000)
 
 #### Saving posterior mode in $Sol
@@ -163,7 +167,7 @@ mean(mcmc(fixedtest$Sol[,"(Intercept)"])+fixedtest$Sol[,"Migration_distanceshort
 HPDinterval(mcmc(fixedtest$Sol[,"(Intercept)"])+fixedtest$Sol[,"Migration_distanceshort"]+fixedtest$Sol[,"ContinentEurope"])
 
 #### (Co)variance structures
-
+migrationtime$Response_variable <- as.factor(migrationtime$Response_variable)
 levels(migrationtime$Response_variable) # check how many levels there are in this variable to account for the heterogeneity of variance in responses
 
 prior4<-list(R=list(V=diag(3),nu=0.002) # changing the matrix here to 3x3 means you can have a separate variance for each response variable
@@ -172,7 +176,9 @@ prior4<-list(R=list(V=diag(3),nu=0.002) # changing the matrix here to 3x3 means 
 					  , G1=list(V=diag(1), nu=1, alpha.mu=0, alpha.V=diag(1)*a)
                       , G1=list(V=diag(1), nu=1, alpha.mu=0, alpha.V=diag(1)*a)))
 
-fixedtest <- MCMCglmm (Slope~Migration_distance+Continent, random = ~Species+Location+Study+idh(SE):units, data = migrationtime, rcov = ~idh(Response_variable):units, prior = prior4, pr = TRUE, nitt = 60000)
+fixedtest <- MCMCglmm (Slope~Migration_distance+Continent, random = ~Species+Location+Study+idh(SE):units, data = migrationtime, rcov = ~idh(Response_variable):units, prior = prior4, nitt = 60000)
+
+summary(fixedtest)
 
 ####### Now it's your turn #######
 
