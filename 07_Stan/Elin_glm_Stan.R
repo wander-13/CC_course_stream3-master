@@ -104,3 +104,15 @@ prior_summary(stan_glm1)
 # Extract stan code from an rstanarm/brms model 
 stancode <- rstan::get_stancode(stan_glm1$stanfit)
 cat(stancode)
+
+# update model with a negative binomial distribution
+stan_glm2 <- update(stan_glm1, family = neg_binomial_2)
+
+# Check convergence & priors
+plot(stan_glm2, plotfun = "trace")
+summary(stan_glm2)
+prior_summary(stan_glm2)
+
+# Posterior Predictive Checks
+pp_check(stan_glm2, plotfun = "stat", stat = "mean")
+pp_check(stan_glm2, plotfun = "dens_overlay")
