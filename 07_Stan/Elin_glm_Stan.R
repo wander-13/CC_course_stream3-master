@@ -72,3 +72,14 @@ summary(stan_glm1)
 # n_eff - effective sample size looks good >1000 
 # Rhat - potential scale reduction factor (indicating convergence if = 1), greater
 # than one could indicate an issue
+
+# posterior Predictive checks
+# y_rep variable = model predictions
+# generated quantities block = your posterior distributions
+# compareing model predictions to raw data
+pp_check(stan_glm1, plotfun = "stat", stat = "mean")
+pp_check(stan_glm1, plotfun = "dens_overlay")
+# predictions follow raw data overall, acceptable
+
+# diagnostics with shinystan - works with rstan, rstanarm, and brms packages stan models
+launch_shinystan(stan_glm1)
