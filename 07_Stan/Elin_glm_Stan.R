@@ -116,3 +116,19 @@ prior_summary(stan_glm2)
 # Posterior Predictive Checks
 pp_check(stan_glm2, plotfun = "stat", stat = "mean")
 pp_check(stan_glm2, plotfun = "dens_overlay")
+
+
+
+# Run a stan model with the brms package
+# fit a brms model
+stan_glm_brms <- brm(bf(Richness ~ I(Year-2007),
+                        family = brmsfamily('poisson')), data = toolik_richness,
+                     iter = 1000,
+                     chains = 4, cores = 4)
+
+summary(stan_glm_brms)
+plot(stan_glm_brms)
+
+# Extract Stan code
+# The code is nicely annotated, so you can read through
+stancode(stan_glm_brms)
