@@ -62,3 +62,13 @@ unique(toolik_richness$Year)
 stan_glm1 <- stan_glm(Richness ~ I(Year-2007),  # year transformation
                       data = toolik_richness, family = poisson,
                       chains = 4, cores = 4)
+
+# Assessing model convergence
+# examining trace plots
+plot(stan_glm1, plotfun = "trace") # looks fine
+
+# check summary
+summary(stan_glm1)
+# n_eff - effective sample size looks good >1000 
+# Rhat - potential scale reduction factor (indicating convergence if = 1), greater
+# than one could indicate an issue
