@@ -83,3 +83,24 @@ pp_check(stan_glm1, plotfun = "dens_overlay")
 
 # diagnostics with shinystan - works with rstan, rstanarm, and brms packages stan models
 launch_shinystan(stan_glm1)
+
+# Research question
+# Has species richness changed?
+(model_fit <- toolik_richness %>%
+    data_grid(Year = seq_range(Year, n = 101)) %>%
+    add_predicted_draws(stan_glm1) %>%
+    ggplot(aes(x = Year, y = Richness)) +
+    stat_lineribbon(aes(y = .prediction), .width = c(.95, .80, .50),
+                    alpha = 1/2, colour = "black") +
+    geom_point(data = toolik_richness, colour = "darkseagreen4", size = 3) +
+    scale_fill_brewer(palette = "Greys"))
+
+# Proiors!!
+# checking model priors
+prior_summary(stan_glm1)
+# rstanarm sutomatically centers and scales model variable data
+# these are weakly informative priors, suitable for us
+
+# Extract stan code from an rstanarm/brms model 
+stancode <- rstan::get_stancode(stan_glm1$stanfit)
+cat(stancode)
